@@ -4,7 +4,7 @@
 
 ## ___***FreeScale: Unleashing the Resolution of Diffusion Models via Tuning-Free Scale Fusion***___
 
-### 🔥🔥🔥 FreeScale is a tuning-free method for higher visual generation, unlocking the 8k image generation!
+### 🔥🔥🔥 FreeScale is a tuning-free method for higher-resolution visual generation, unlocking the 8k image generation!
 
 <div align="center">
  <a href='https://arxiv.org/abs/2412.09626'><img src='https://img.shields.io/badge/arXiv-2412.09626-b31b1b.svg'></a> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
