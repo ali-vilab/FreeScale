@@ -65,6 +65,6 @@ pip install -r requirements.txt
 <img src="assets/fig_mask.png">
 
 ### 3. Tips:
-1. Generating 8k (8192 x 8192) images will cost around 56 GB and 1 hour on NVIDIA A800. 
+1. Generating 8k (8192 x 8192) images will cost around 55 GB and 1 hour on NVIDIA A800. 
 2. Set `fast_mode = True` can significantly shorten the time but lead to some loss of quality especially for 8k image generation.
 3. For 8k image generation, `cosine_scale <= 1.0` is recommended. Or use the Flexible Control for Detail Level function and set a small `cosine_scale_bg` (e.g. 0.5) for areas with artifacts. 
