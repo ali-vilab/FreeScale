@@ -722,6 +722,7 @@ class StableDiffusionXLPipeline(DiffusionPipeline, FromSingleFileMixin, LoraLoad
         cosine_scale: float = 2.0,
         cosine_scale_bg: float = 1.0,
         dilate_tau: int = 35,
+        fast_mode: bool = False,
         img_path: Optional[str] = "",
         mask_path: Optional[str] = "",
     ):
@@ -1016,6 +1017,7 @@ class StableDiffusionXLPipeline(DiffusionPipeline, FromSingleFileMixin, LoraLoad
                     if isinstance(module, BasicTransformerBlock):
                         module.forward = scale_forward.__get__(module, BasicTransformerBlock)
                         module.current_hw = target_size
+                        module.fast_mode = fast_mode
 
             needs_upcasting = self.vae.dtype == torch.float16 and self.vae.config.force_upcast
             if needs_upcasting:

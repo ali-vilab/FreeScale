@@ -30,6 +30,7 @@ resolutions_list = [[1024, 1024],
 cosine_scale = 3.0
 cosine_scale_bg = 0.5
 disable_freeu = 0
+fast_mode = False
 
 pipe = StableDiffusionXLPipeline.from_pretrained(model_ckpt, local_files_only= True, torch_dtype=torch.float16)
 pipe = pipe.to("cuda")
@@ -47,8 +48,8 @@ for index, prompt in enumerate(prompts):
     print(prompt)
     resuls = pipe(prompt, negative_prompt=negative_prompt, generator=generator,
                 num_inference_steps=50, guidance_scale=7.5,
-                resolutions_list=resolutions_list, cosine_scale=cosine_scale, cosine_scale_bg=cosine_scale_bg,
-                img_path=img_path, mask_path=mask_path,
+                resolutions_list=resolutions_list, fast_mode=fast_mode, cosine_scale=cosine_scale,
+                cosine_scale_bg=cosine_scale_bg, img_path=img_path, mask_path=mask_path,
                 )
     for i, result in enumerate(resuls):
         image = result.images[0]

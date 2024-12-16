@@ -129,8 +129,12 @@ def scale_forward(
     current_scale_num = max(current_scale_num_h, current_scale_num_w)
     global_views = [[h, w] for h in range(current_scale_num_h) for w in range(current_scale_num_w)]
 
-    four_window = True
-    fourg_window = False
+    if self.fast_mode:
+        four_window = False
+        fourg_window = True
+    else:
+        four_window = True
+        fourg_window = False
 
     if four_window:
         norm_hidden_states_ = rearrange(norm_hidden_states, 'bh (h w) d -> bh h w d', h = latent_h)
