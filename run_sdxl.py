@@ -3,17 +3,8 @@ import torch
 from PIL import Image
 
 from pipeline_sdxl import StableDiffusionXLPipeline
+from utils import load_prompts
 from free_lunch_utils import register_free_upblock2d, register_free_crossattn_upblock2d
-
-def load_prompts(prompt_file):
-    f = open(prompt_file, 'r')
-    prompt_list = []
-    for idx, line in enumerate(f.readlines()):
-        l = line.strip()
-        if len(l) != 0:
-            prompt_list.append(l)
-        f.close()
-    return prompt_list
 
 model_ckpt = "../stable-diffusion-xl-base-1.0"
 prompts_file = 'prompts/imgen.txt'

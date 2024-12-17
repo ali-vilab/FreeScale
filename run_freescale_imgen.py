@@ -3,17 +3,8 @@ import torch
 from PIL import Image
 
 from pipeline_freescale_imgen import StableDiffusionXLPipeline
+from utils import load_prompts
 from free_lunch_utils import register_free_upblock2d, register_free_crossattn_upblock2d
-
-def load_prompts(prompt_file):
-    f = open(prompt_file, 'r')
-    prompt_list = []
-    for idx, line in enumerate(f.readlines()):
-        l = line.strip()
-        if len(l) != 0:
-            prompt_list.append(l)
-        f.close()
-    return prompt_list
 
 img_path = 'imgen_intermediates/tmp_img.png'
 mask_path = 'imgen_intermediates/tmp_mask.png'
