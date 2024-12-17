@@ -8,3 +8,4 @@ transformers~=4.25.1
 tqdm
 xformers~=0.0.18
 einops
+gradio
