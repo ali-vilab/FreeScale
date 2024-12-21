@@ -21,7 +21,7 @@ def gaussian_filter(latents, kernel_size=3, sigma=1.0):
     
     return blurred_latents
     
-def get_views(height, width, h_window_size=128, w_window_size=128, scale_factor=8):
+def get_views(height, width, h_window_size=64, w_window_size=64, scale_factor=8):
     height = int(height)
     width = int(width)
     h_window_stride = h_window_size // 2
@@ -92,7 +92,7 @@ def scale_forward(
 ):
     # Notice that normalization is always applied before the real computation in the following blocks.
     if self.current_hw:
-        current_scale_num_h, current_scale_num_w = self.current_hw[0] // 1024, self.current_hw[1] // 1024
+        current_scale_num_h, current_scale_num_w = self.current_hw[0] // 512, self.current_hw[1] // 512
     else:
         current_scale_num_h, current_scale_num_w = 1, 1
 
@@ -113,13 +113,13 @@ def scale_forward(
     ratio_hw = current_scale_num_h / current_scale_num_w
     latent_h = int((norm_hidden_states.shape[1] * ratio_hw) ** 0.5)
     latent_w = int(latent_h / ratio_hw)
-    scale_factor = 128 * current_scale_num_h / latent_h
+    scale_factor = 64 * current_scale_num_h / latent_h
     if ratio_hw > 1:
-        sub_h = 128
-        sub_w = int(128 / ratio_hw)
+        sub_h = 64
+        sub_w = int(64 / ratio_hw)
     else:
-        sub_h = int(128 * ratio_hw)
-        sub_w = 128 
+        sub_h = int(64 * ratio_hw)
+        sub_w = 64 
 
     h_jitter_range = int(sub_h / scale_factor // 8)
     w_jitter_range = int(sub_w / scale_factor // 8)

@@ -33,6 +33,7 @@ from inspect import isfunction
 from functools import partial
 import numpy as np
 
+import torch.nn.functional as F
 from diffusers.models.attention import BasicTransformerBlock
 from scale_attention import ori_forward, scale_forward
 
@@ -815,7 +816,7 @@ class StableDiffusionXLPipeline(DiffusionPipeline, FromSingleFileMixin, LoraLoad
             height, width = resolutions_list[0]
             target_sizes = resolutions_list[1:]
             if not restart_steps:
-                restart_steps = [15] * len(target_sizes)
+                restart_steps = [int(num_inference_steps*0.3)] * len(target_sizes)
         else:
             height = height or self.default_sample_size * self.vae_scale_factor
             width = width or self.default_sample_size * self.vae_scale_factor

@@ -6,7 +6,7 @@ from pipeline_sdxl import StableDiffusionXLPipeline
 from utils import load_prompts
 from free_lunch_utils import register_free_upblock2d, register_free_crossattn_upblock2d
 
-model_ckpt = "../stable-diffusion-xl-base-1.0"
+model_ckpt = "stabilityai/stable-diffusion-xl-base-1.0"
 prompts_file = 'prompts/imgen.txt'
 prompts = load_prompts(prompts_file)
 # prompts = ['Astronaut on Mars During sunset.']
@@ -17,7 +17,7 @@ height=1024
 width=1024
 disable_freeu = 0
 
-pipe = StableDiffusionXLPipeline.from_pretrained(model_ckpt, local_files_only= True, torch_dtype=torch.float16)
+pipe = StableDiffusionXLPipeline.from_pretrained(model_ckpt, torch_dtype=torch.float16)
 pipe = pipe.to("cuda")
 if not disable_freeu:
     register_free_upblock2d(pipe, b1=1.1, b2=1.2, s1=0.6, s2=0.4)

@@ -1,8 +1,6 @@
 import gradio as gr
 
-import os
 import torch
-from PIL import Image
 
 from pipeline_freescale import StableDiffusionXLPipeline
 from free_lunch_utils import register_free_upblock2d, register_free_crossattn_upblock2d
@@ -68,84 +66,6 @@ examples = [
 
 css = """
 #col-container {max-width: 768px; margin-left: auto; margin-right: auto;}
-a {text-decoration-line: underline; font-weight: 600;}
-.animate-spin {
-  animation: spin 1s linear infinite;
-}
-@keyframes spin {
-  from {
-      transform: rotate(0deg);
-  }
-  to {
-      transform: rotate(360deg);
-  }
-}
-#share-btn-container {
-  display: flex; 
-  padding-left: 0.5rem !important; 
-  padding-right: 0.5rem !important; 
-  background-color: #000000; 
-  justify-content: center; 
-  align-items: center; 
-  border-radius: 9999px !important; 
-  max-width: 15rem;
-  height: 36px;
-}
-div#share-btn-container > div {
-    flex-direction: row;
-    background: black;
-    align-items: center;
-}
-#share-btn-container:hover {
-  background-color: #060606;
-}
-#share-btn {
-  all: initial; 
-  color: #ffffff;
-  font-weight: 600; 
-  cursor:pointer; 
-  font-family: 'IBM Plex Sans', sans-serif; 
-  margin-left: 0.5rem !important; 
-  padding-top: 0.5rem !important; 
-  padding-bottom: 0.5rem !important;
-  right:0;
-}
-#share-btn * {
-  all: unset;
-}
-#share-btn-container div:nth-child(-n+2){
-  width: auto !important;
-  min-height: 0px !important;
-}
-#share-btn-container .wrap {
-  display: none !important;
-}
-#share-btn-container.hidden {
-  display: none!important;
-}
-img[src*='#center'] { 
-    display: inline-block;
-    margin: unset;
-}
-.footer {
-        margin-bottom: 45px;
-        margin-top: 10px;
-        text-align: center;
-        border-bottom: 1px solid #e5e5e5;
-    }
-    .footer>p {
-        font-size: .8rem;
-        display: inline-block;
-        padding: 0 10px;
-        transform: translateY(10px);
-        background: white;
-    }
-    .dark .footer {
-        border-color: #303030;
-    }
-    .dark .footer>p {
-        background: #0b0f19;
-    }
 """
 
 with gr.Blocks(css=css) as demo:

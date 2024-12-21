@@ -35,9 +35,7 @@ import numpy as np
 
 import torch.nn.functional as F
 from diffusers.models.attention import BasicTransformerBlock
-from scale_attention import ori_forward, scale_forward
-from PIL import Image
-import torchvision.transforms as transforms
+from scale_attention_turbo import ori_forward, scale_forward
 
 logger = logging.get_logger(__name__)  # pylint: disable=invalid-name
 
@@ -56,25 +54,6 @@ EXAMPLE_DOC_STRING = """
         >>> image = pipe(prompt).images[0]
         ```
 """
-
-def process_image_to_tensor(image_path):
-    image = Image.open(image_path).convert("RGB")
-    transform = transforms.Compose(
-        [
-            # transforms.Resize((1024, 1024)),
-            transforms.ToTensor(),
-            transforms.Normalize(mean=[0.5, 0.5, 0.5], std=[0.5, 0.5, 0.5]),
-        ]
-    )
-    image_tensor = transform(image)
-    return image_tensor
-
-def process_image_to_bitensor(image_path):
-    image = Image.open(image_path).convert("L")
-    transform = transforms.ToTensor()
-    image_tensor = transform(image)
-    binary_tensor = torch.where(image_tensor != 0, torch.tensor(1.0), torch.tensor(0.0))
-    return binary_tensor
 
 def default(val, d):
     if exists(val):
@@ -213,7 +192,7 @@ def rescale_noise_cfg(noise_cfg, noise_pred_text, guidance_rescale=0.0):
     return noise_cfg
 
 
-class StableDiffusionXLPipeline(DiffusionPipeline, FromSingleFileMixin, LoraLoaderMixin):
+class StableDiffusionXLPipeline_Turbo(DiffusionPipeline, FromSingleFileMixin, LoraLoaderMixin):
     r"""
     Pipeline for text-to-image generation using Stable Diffusion XL.
 
@@ -721,11 +700,8 @@ class StableDiffusionXLPipeline(DiffusionPipeline, FromSingleFileMixin, LoraLoad
         resolutions_list: Optional[Union[int, List[int]]] = None,
         restart_steps: Optional[Union[int, List[int]]] = None,
         cosine_scale: float = 2.0,
-        cosine_scale_bg: float = 1.0,
         dilate_tau: int = 35,
         fast_mode: bool = False,
-        img_path: Optional[str] = "",
-        mask_path: Optional[str] = "",
     ):
         r"""
         Function invoked when calling the pipeline for generation.
@@ -840,7 +816,7 @@ class StableDiffusionXLPipeline(DiffusionPipeline, FromSingleFileMixin, LoraLoad
             height, width = resolutions_list[0]
             target_sizes = resolutions_list[1:]
             if not restart_steps:
-                restart_steps = [int(num_inference_steps*0.3)] * len(target_sizes)
+                restart_steps = [int(num_inference_steps*0.5)] * len(target_sizes)
         else:
             height = height or self.default_sample_size * self.vae_scale_factor
             width = width or self.default_sample_size * self.vae_scale_factor
@@ -959,55 +935,43 @@ class StableDiffusionXLPipeline(DiffusionPipeline, FromSingleFileMixin, LoraLoad
                 if isinstance(module, BasicTransformerBlock):
                     module.forward = ori_forward.__get__(module, BasicTransformerBlock)
 
-        if img_path != '':
-            needs_upcasting = self.vae.dtype == torch.float16 and self.vae.config.force_upcast
-            if needs_upcasting:
-                self.upcast_vae()
-                latents = latents.to(next(iter(self.vae.post_quant_conv.parameters())).dtype)
-            input_image = process_image_to_tensor(img_path).unsqueeze(0).float().to(device)
-            latents = self.vae.encode(input_image).latent_dist.sample().half()
-            latents = latents * self.vae.config.scaling_factor
-        else:
-            with self.progress_bar(total=num_inference_steps) as progress_bar:
-                for i, t in enumerate(timesteps):
-                    # expand the latents if we are doing classifier free guidance
-                    latent_model_input = torch.cat([latents] * 2) if do_classifier_free_guidance else latents
+        with self.progress_bar(total=num_inference_steps) as progress_bar:
+            for i, t in enumerate(timesteps):
+                # expand the latents if we are doing classifier free guidance
+                latent_model_input = torch.cat([latents] * 2) if do_classifier_free_guidance else latents
 
-                    latent_model_input = self.scheduler.scale_model_input(latent_model_input, t)
+                latent_model_input = self.scheduler.scale_model_input(latent_model_input, t)
 
-                    # predict the noise residual
-                    added_cond_kwargs = {"text_embeds": add_text_embeds, "time_ids": add_time_ids}
-                    noise_pred = self.unet(
-                        latent_model_input,
-                        t,
-                        encoder_hidden_states=prompt_embeds,
-                        cross_attention_kwargs=cross_attention_kwargs,
-                        added_cond_kwargs=added_cond_kwargs,
-                        return_dict=False,
-                    )[0]
+                # predict the noise residual
+                added_cond_kwargs = {"text_embeds": add_text_embeds, "time_ids": add_time_ids}
+                noise_pred = self.unet(
+                    latent_model_input,
+                    t,
+                    encoder_hidden_states=prompt_embeds,
+                    cross_attention_kwargs=cross_attention_kwargs,
+                    added_cond_kwargs=added_cond_kwargs,
+                    return_dict=False,
+                )[0]
 
-                    # perform guidance
-                    if do_classifier_free_guidance:
-                        noise_pred_uncond, noise_pred_text = noise_pred.chunk(2)
-                        noise_pred = noise_pred_uncond + guidance_scale * (noise_pred_text - noise_pred_uncond)
+                # perform guidance
+                if do_classifier_free_guidance:
+                    noise_pred_uncond, noise_pred_text = noise_pred.chunk(2)
+                    noise_pred = noise_pred_uncond + guidance_scale * (noise_pred_text - noise_pred_uncond)
 
-                    if do_classifier_free_guidance and guidance_rescale > 0.0:
-                        # Based on 3.4. in https://arxiv.org/pdf/2305.08891.pdf
-                        noise_pred = rescale_noise_cfg(noise_pred, noise_pred_text, guidance_rescale=guidance_rescale)
+                if do_classifier_free_guidance and guidance_rescale > 0.0:
+                    # Based on 3.4. in https://arxiv.org/pdf/2305.08891.pdf
+                    noise_pred = rescale_noise_cfg(noise_pred, noise_pred_text, guidance_rescale=guidance_rescale)
 
-                    # compute the previous noisy sample x_t -> x_t-1
-                    latents = self.scheduler.step(noise_pred, t, latents, **extra_step_kwargs, return_dict=False)[0]
+                # compute the previous noisy sample x_t -> x_t-1
+                latents = self.scheduler.step(noise_pred, t, latents, **extra_step_kwargs, return_dict=False)[0]
 
-                    # call the callback, if provided
-                    if i == len(timesteps) - 1 or ((i + 1) > num_warmup_steps and (i + 1) % self.scheduler.order == 0):
-                        progress_bar.update()
-                        if callback is not None and i % callback_steps == 0:
-                            callback(i, t, latents)
+                # call the callback, if provided
+                if i == len(timesteps) - 1 or ((i + 1) > num_warmup_steps and (i + 1) % self.scheduler.order == 0):
+                    progress_bar.update()
+                    if callback is not None and i % callback_steps == 0:
+                        callback(i, t, latents)
 
         results_list.append(latents)
-
-        if mask_path != '':
-            mask = process_image_to_bitensor(mask_path).unsqueeze(0)
 
         for restart_index, target_size in enumerate(target_sizes):
             restart_step = restart_steps[restart_index]
@@ -1035,13 +999,6 @@ class StableDiffusionXLPipeline(DiffusionPipeline, FromSingleFileMixin, LoraLoad
             latents = self.vae.encode(image).latent_dist.sample().half()
             latents = latents * self.vae.config.scaling_factor
 
-            if mask_path != '':
-                mask_ = torch.nn.functional.interpolate(
-                    mask,
-                    size=target_size_,
-                    mode="nearest",
-                    ).to(device)
-
             noise_latents = []
             noise = torch.randn_like(latents)
             for timestep in self.scheduler.timesteps:
@@ -1059,10 +1016,7 @@ class StableDiffusionXLPipeline(DiffusionPipeline, FromSingleFileMixin, LoraLoad
                         continue
 
                     cosine_factor = 0.5 * (1 + torch.cos(torch.pi * (self.scheduler.config.num_train_timesteps - t) / self.scheduler.config.num_train_timesteps)).cpu()
-                    if mask_path != '':
-                        c1 = (cosine_factor ** (mask_ * cosine_scale + (1-mask_) * cosine_scale_bg)).to(dtype=torch.float16)
-                    else:
-                        c1 = cosine_factor ** cosine_scale
+                    c1 = cosine_factor ** cosine_scale
                     latents = latents * (1 - c1) + noise_latents[i] * c1
 
                     dilate_coef=target_size[1]//1024
