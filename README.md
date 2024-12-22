@@ -78,6 +78,9 @@ pip install -r requirements.txt
 2) Input the following commands in terminal:
 ```bash
   python run_freescale_turbo.py
+
+  # num_inference_steps: 2 ~ 8.
+  # Currently, the resolution that exceeds 2048 x 2048 will introduce quality loss in the Turbo mode.
 ```
 
 
