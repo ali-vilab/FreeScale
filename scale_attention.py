@@ -159,6 +159,7 @@ def scale_forward(
         count = count[:, h_jitter_range:-h_jitter_range, w_jitter_range:-w_jitter_range, :]
         attn_output = torch.where(count>0, value/count, value)
         
+        attn_output = rearrange(attn_output, 'bh h w d -> bh d h w')
         gaussian_local = gaussian_filter(attn_output, kernel_size=(2*current_scale_num-1), sigma=1.0)
 
         attn_output_global = self.attn1(
@@ -167,12 +168,12 @@ def scale_forward(
             attention_mask=attention_mask,
             **cross_attention_kwargs,
         )
-        attn_output_global = rearrange(attn_output_global, 'bh (h w) d -> bh h w d', h = latent_h)
+        attn_output_global = rearrange(attn_output_global, 'bh (h w) d -> bh d h w', h = latent_h)
 
         gaussian_global = gaussian_filter(attn_output_global, kernel_size=(2*current_scale_num-1), sigma=1.0)
 
         attn_output = gaussian_local + (attn_output_global - gaussian_global)
-        attn_output = rearrange(attn_output, 'bh h w d -> bh (h w) d')
+        attn_output = rearrange(attn_output, 'bh d h w -> bh (h w) d')
 
     elif fourg_window:
         norm_hidden_states = rearrange(norm_hidden_states, 'bh (h w) d -> bh h w d', h = latent_h)
@@ -198,6 +199,7 @@ def scale_forward(
         count = count[:, h_jitter_range:-h_jitter_range, w_jitter_range:-w_jitter_range, :]
         attn_output = torch.where(count>0, value/count, value)
         
+        attn_output = rearrange(attn_output, 'bh h w d -> bh d h w')
         gaussian_local = gaussian_filter(attn_output, kernel_size=(2*current_scale_num-1), sigma=1.0)
 
         value = torch.zeros_like(norm_hidden_states)
@@ -219,10 +221,11 @@ def scale_forward(
 
         attn_output_global = torch.where(count>0, value/count, value)
 
+        attn_output_global = rearrange(attn_output_global, 'bh h w d -> bh d h w')
         gaussian_global = gaussian_filter(attn_output_global, kernel_size=(2*current_scale_num-1), sigma=1.0)
 
         attn_output = gaussian_local + (attn_output_global - gaussian_global)
-        attn_output = rearrange(attn_output, 'bh h w d -> bh (h w) d')
+        attn_output = rearrange(attn_output, 'bh d h w -> bh (h w) d')
         
     else:
         attn_output = self.attn1(
