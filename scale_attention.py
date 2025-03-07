@@ -9,15 +9,15 @@ def gaussian_kernel(kernel_size=3, sigma=1.0, channels=3):
     x_coord = torch.arange(kernel_size)
     gaussian_1d = torch.exp(-(x_coord - (kernel_size - 1) / 2) ** 2 / (2 * sigma ** 2))
     gaussian_1d = gaussian_1d / gaussian_1d.sum()
-    gaussian_2d = gaussian_1d[:, None] * gaussian_1d[None, :]
-    kernel = gaussian_2d[None, None, :, :].repeat(channels, 1, 1, 1)
+    gaussian_3d = gaussian_1d[:, None, None] * gaussian_1d[None, :, None] * gaussian_1d[None, None, :]
+    kernel = gaussian_3d[None, None, :, :, :].repeat(channels, 1, 1, 1, 1)
     
     return kernel
 
 def gaussian_filter(latents, kernel_size=3, sigma=1.0):
-    channels = latents.shape[1]
+    channels = latents.shape[0]
     kernel = gaussian_kernel(kernel_size, sigma, channels).to(latents.device, latents.dtype)
-    blurred_latents = F.conv2d(latents, kernel, padding=kernel_size//2, groups=channels)
+    blurred_latents = F.conv3d(latents.unsqueeze(0), kernel, padding=kernel_size//2, groups=channels)[0]
     
     return blurred_latents
     
@@ -159,7 +159,6 @@ def scale_forward(
         count = count[:, h_jitter_range:-h_jitter_range, w_jitter_range:-w_jitter_range, :]
         attn_output = torch.where(count>0, value/count, value)
         
-        attn_output = rearrange(attn_output, 'bh h w d -> bh d h w')
         gaussian_local = gaussian_filter(attn_output, kernel_size=(2*current_scale_num-1), sigma=1.0)
 
         attn_output_global = self.attn1(
@@ -168,12 +167,12 @@ def scale_forward(
             attention_mask=attention_mask,
             **cross_attention_kwargs,
         )
-        attn_output_global = rearrange(attn_output_global, 'bh (h w) d -> bh d h w', h = latent_h)
+        attn_output_global = rearrange(attn_output_global, 'bh (h w) d -> bh h w d', h = latent_h)
 
         gaussian_global = gaussian_filter(attn_output_global, kernel_size=(2*current_scale_num-1), sigma=1.0)
 
         attn_output = gaussian_local + (attn_output_global - gaussian_global)
-        attn_output = rearrange(attn_output, 'bh d h w -> bh (h w) d')
+        attn_output = rearrange(attn_output, 'bh h w d -> bh (h w) d')
 
     elif fourg_window:
         norm_hidden_states = rearrange(norm_hidden_states, 'bh (h w) d -> bh h w d', h = latent_h)
@@ -199,7 +198,6 @@ def scale_forward(
         count = count[:, h_jitter_range:-h_jitter_range, w_jitter_range:-w_jitter_range, :]
         attn_output = torch.where(count>0, value/count, value)
         
-        attn_output = rearrange(attn_output, 'bh h w d -> bh d h w')
         gaussian_local = gaussian_filter(attn_output, kernel_size=(2*current_scale_num-1), sigma=1.0)
 
         value = torch.zeros_like(norm_hidden_states)
@@ -221,11 +219,10 @@ def scale_forward(
 
         attn_output_global = torch.where(count>0, value/count, value)
 
-        attn_output_global = rearrange(attn_output_global, 'bh h w d -> bh d h w')
         gaussian_global = gaussian_filter(attn_output_global, kernel_size=(2*current_scale_num-1), sigma=1.0)
 
         attn_output = gaussian_local + (attn_output_global - gaussian_global)
-        attn_output = rearrange(attn_output, 'bh d h w -> bh (h w) d')
+        attn_output = rearrange(attn_output, 'bh h w d -> bh (h w) d')
         
     else:
         attn_output = self.attn1(
