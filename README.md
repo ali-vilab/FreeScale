@@ -14,9 +14,9 @@
 
 _**[Haonan Qiu](http://haonanqiu.com/), [Shiwei Zhang*](https://scholar.google.com/citations?user=ZO3OQ-8AAAAJ), [Yujie Wei](https://weilllllls.github.io/), [Ruihang Chu](https://ruihangchu.com/), [Hangjie Yuan](https://jacobyuan7.github.io/), 
 <br>
-[Xiang Wang](https://scholar.google.com/citations?user=cQbXvkcAAAAJ), [Yingya Zhang](https://scholar.google.com/citations?user=16RDSEUAAAAJ), and [Ziwei Liu†](https://liuziwei7.github.io/)**_
+[Xiang Wang](https://scholar.google.com/citations?user=cQbXvkcAAAAJ), [Yingya Zhang](https://scholar.google.com/citations?user=16RDSEUAAAAJ), and [Ziwei Liu*](https://liuziwei7.github.io/)**_
 <br><br>
-(* Project Leader, † Corresponding Author)
+(* Corresponding Author)
 
 From Alibaba Group and Nanyang Technological University.
 
