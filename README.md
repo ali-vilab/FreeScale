@@ -4,7 +4,8 @@
 
 ## ___***FreeScale: Unleashing the Resolution of Diffusion Models via Tuning-Free Scale Fusion***___
 
-### 🔥🔥🔥 FreeScale is a tuning-free method for higher-resolution visual generation, unlocking the 8k image generation!
+### 🔥🔥🔥 FreeScale is a tuning-free method for higher-resolution visual generation, unlocking the 8k image generation! 
+### 🔥🔥🔥 The extended work [CineScale](https://github.com/Eyeline-Labs/CineScale) for higher-resolution visual generation based on [Wan 2.1](https://github.com/Wan-Video/Wan2.1) is available, unlocking the 4k video generation!
 
 <div align="center">
  <a href='https://arxiv.org/abs/2412.09626'><img src='https://img.shields.io/badge/arXiv-2412.09626-b31b1b.svg'></a> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
@@ -36,7 +37,7 @@ pip install -r requirements.txt
 ## 🤗 Quick start with [Gradio](https://www.gradio.app/guides/quickstart)
 
 ```bash
-  gradio gradio_app.py
+gradio gradio_app.py
 ```
 
 ## 💫 Inference with Command
@@ -45,10 +46,10 @@ pip install -r requirements.txt
 1) Modify the `run_freescale.py` and input the following commands in the terminal.
 2) Input the following commands in terminal:
 ```bash
-  python run_freescale.py
+python run_freescale.py
 
-  # resolutions_list: resolutions for each stage of self-cascade upscaling.
-  # cosine_scale: detail scale, usually 1.0 ~ 2.0. For 8k image generation, cosine_scale <= 1.0 is recommended.
+# resolutions_list: resolutions for each stage of self-cascade upscaling.
+# cosine_scale: detail scale, usually 1.0 ~ 2.0. For 8k image generation, cosine_scale <= 1.0 is recommended.
 ```
 <img src="assets/fig_diff8k.png">
 
@@ -57,18 +58,18 @@ pip install -r requirements.txt
 1) Modify the `run_sdxl.py` and generate the base image with the original resolutions.
 2) Input the following commands in terminal:
 ```bash
-  python run_sdxl.py
+python run_sdxl.py
 ```
 3) Put the generated image into folder `imgen_intermediates`.
 4) (Optional) Generate the mask using other segmentation models (e.g., [Segment Anything](https://huggingface.co/spaces/Xenova/segment-anything-web)) and put the mask into folder `imgen_intermediates`.
 5) Modify the `run_freescale_imgen.py` and generate the final image with the higher resolutions.
 6) Input the following commands in terminal:
 ```bash
-  python run_freescale_imgen.py
+python run_freescale_imgen.py
 
-  # resolutions_list: resolutions for each stage of self-cascade upscaling.
-  # cosine_scale: detail scale for foreground, usually 2.0 ~ 3.0. 
-  # cosine_scale_bg: detail scale for background, usually 0.5 ~ 1.0.
+# resolutions_list: resolutions for each stage of self-cascade upscaling.
+# cosine_scale: detail scale for foreground, usually 2.0 ~ 3.0. 
+# cosine_scale_bg: detail scale for background, usually 0.5 ~ 1.0.
 ```
 <img src="assets/fig_mask.png">
 
@@ -77,10 +78,10 @@ pip install -r requirements.txt
 1) Modify the `run_freescale_turbo.py` and input the following commands in the terminal.
 2) Input the following commands in terminal:
 ```bash
-  python run_freescale_turbo.py
+python run_freescale_turbo.py
 
-  # num_inference_steps: 2 ~ 8.
-  # Currently, the resolution that exceeds 2048 x 2048 will introduce quality loss in the Turbo mode.
+# num_inference_steps: 2 ~ 8.
+# Currently, the resolution that exceeds 2048 x 2048 will introduce quality loss in the Turbo mode.
 ```
 
 
