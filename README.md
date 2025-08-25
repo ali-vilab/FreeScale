@@ -5,7 +5,7 @@
 ## ___***FreeScale: Unleashing the Resolution of Diffusion Models via Tuning-Free Scale Fusion***___
 
 ### 🔥🔥🔥 FreeScale is a tuning-free method for higher-resolution visual generation, unlocking the 8k image generation! 
-### 🔥🔥🔥 The extended work [CineScale](https://github.com/Eyeline-Labs/CineScale) for higher-resolution visual generation based on [Wan 2.1](https://github.com/Wan-Video/Wan2.1) is available, unlocking the 4k video generation!
+### 🚀🚀🚀 The extended work [CineScale](https://github.com/Eyeline-Labs/CineScale) for higher-resolution visual generation based on [Wan 2.1](https://github.com/Wan-Video/Wan2.1) is available, unlocking the 4k video generation!
 
 <div align="center">
  <a href='https://arxiv.org/abs/2412.09626'><img src='https://img.shields.io/badge/arXiv-2412.09626-b31b1b.svg'></a> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
