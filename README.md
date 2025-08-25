@@ -100,6 +100,12 @@ If your have any questions about FreeScale, feel free to contact [Haonan Qiu](ht
 <br>
 
 
+## 🚀 My Free Series
+[FreeNoise](https://github.com/AILab-CVC/FreeNoise): Tuning-free method for longer video generation.
+
+[FreeTraj](https://github.com/arthur-qiu/FreeTraj): Tuning-free method for trajectory control.
+
+
 ## 😉 Citation
 ```bib
 @article{qiu2024freescale,
